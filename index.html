@@ -100,6 +100,108 @@
             <h3>World</h3>
         </a>
     </div>
+<script>
+(function() {
+    // CONFIGURATION
+    const KEY_TRIGGER = 'r'; // The letter to press
+    const REQUIRE_ALT = true; // Require Alt key?
 
+    document.addEventListener('keydown', function(e) {
+        // Check for Alt + R
+        if (e.key.toLowerCase() === KEY_TRIGGER && e.altKey === REQUIRE_ALT) {
+            e.preventDefault();
+            openRenamerMenu();
+        }
+    });
+
+    function openRenamerMenu() {
+        // Prevent opening multiple menus
+        if (document.getElementById('tab-renamer-overlay')) return;
+
+        // 1. Create the Overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'tab-renamer-overlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+            font-family: Arial, sans-serif;
+        `;
+
+        // 2. Create the Box
+        const box = document.createElement('div');
+        box.style.cssText = `
+            background: white; padding: 25px; border-radius: 8px;
+            width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px;
+        `;
+
+        // 3. Title & Inputs
+        const header = document.createElement('h3');
+        header.innerText = "Rename Tab";
+        header.style.margin = "0 0 5px 0";
+
+        const inputName = document.createElement('input');
+        inputName.placeholder = "New Tab Title";
+        inputName.value = document.title;
+        inputName.style.cssText = "padding: 10px; border: 1px solid #ccc; border-radius: 4px;";
+
+        const inputIcon = document.createElement('input');
+        inputIcon.placeholder = "New Icon URL (https://...)";
+        inputIcon.style.cssText = "padding: 10px; border: 1px solid #ccc; border-radius: 4px;";
+
+        // 4. Buttons
+        const btnRow = document.createElement('div');
+        btnRow.style.cssText = "display: flex; justify-content: flex-end; gap: 10px;";
+
+        const btnCancel = document.createElement('button');
+        btnCancel.innerText = "Cancel";
+        btnCancel.style.cssText = "padding: 8px 15px; cursor: pointer; border: none; background: #eee; border-radius: 4px;";
+        
+        const btnSave = document.createElement('button');
+        btnSave.innerText = "Save";
+        btnSave.style.cssText = "padding: 8px 15px; cursor: pointer; border: none; background: #007bff; color: white; border-radius: 4px;";
+
+        // 5. Actions
+        const closeMenu = () => overlay.remove();
+
+        btnCancel.onclick = closeMenu;
+        overlay.onclick = (e) => { if(e.target === overlay) closeMenu(); };
+
+        btnSave.onclick = () => {
+            // Update Title
+            if (inputName.value) document.title = inputName.value;
+            
+            // Update Icon
+            if (inputIcon.value) {
+                let link = document.querySelector("link[rel*='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'shortcut icon';
+                    document.head.appendChild(link);
+                }
+                link.href = inputIcon.value;
+                // Trick to force browser refresh of icon
+                document.head.removeChild(link);
+                document.head.appendChild(link);
+            }
+            closeMenu();
+        };
+
+        // Assemble
+        btnRow.appendChild(btnCancel);
+        btnRow.appendChild(btnSave);
+        box.appendChild(header);
+        box.appendChild(inputName);
+        box.appendChild(inputIcon);
+        box.appendChild(btnRow);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        
+        // Focus the name input immediately
+        inputName.focus();
+    }
+})();
+</script>
 </body>
 </html>
