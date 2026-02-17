@@ -146,6 +146,35 @@
 </body>
 <!--Made by irv77-->
 <script>
+    // ==========================================
+    // 1. TAB RENAMER (Added Feature)
+    // ==========================================
+    console.log("Renamer Loaded");
+    document.addEventListener('keydown', function(e) {
+        // Check for Alt + R
+        if (e.altKey && e.key.toLowerCase() === 'r') {
+            e.preventDefault();
+            
+            // Ask for new title
+            let title = prompt("New Tab Name:", document.title);
+            if (title) document.title = title;
+
+            // Ask for new icon
+            let icon = prompt("New Icon URL (leave blank to skip):");
+            if (icon) {
+                // Remove old icons to ensure the new one works
+                let oldLinks = document.querySelectorAll("link[rel*='icon']");
+                oldLinks.forEach(l => l.remove());
+
+                let link = document.createElement('link');
+                link.type = 'image/x-icon';
+                link.rel = 'shortcut icon';
+                link.href = icon;
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+        }
+    });
+    
     const parts = 20;
     let gametitle, runtimecanvas
     gametitle = document.title;
