@@ -14,8 +14,11 @@
             flex-direction: column;
             align-items: center;
             padding: 40px;
+            margin: 0;
+            min-height: 100vh;
         }
 
+        /* --- EXISTING STYLES --- */
         h1 {
             color: #b30000;
             text-shadow: 2px 2px 5px #000;
@@ -41,6 +44,7 @@
             cursor: pointer;
             text-decoration: none;
             color: inherit;
+            display: block; /* Fix for links */
         }
 
         .game-card:hover {
@@ -60,46 +64,247 @@
             color: #666;
             text-transform: uppercase;
         }
+
+        /* --- NEW SECURITY & POPUP STYLES --- */
+        .hidden { display: none !important; }
+
+        #security-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #050505;
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .auth-box {
+            background: #0a0a0a;
+            border: 2px solid #b30000;
+            padding: 40px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(179, 0, 0, 0.2);
+        }
+
+        .auth-box h2 {
+            color: #b30000; margin-top: 0; 
+            border-bottom: 1px solid #333; padding-bottom: 10px;
+        }
+
+        .auth-box p { color: #888; font-size: 0.9rem; }
+
+        .auth-box input {
+            width: 90%; padding: 10px; margin: 10px 0;
+            background: #111; border: 1px solid #444; color: #fff;
+            font-family: 'Courier New', monospace; text-align: center;
+        }
+
+        .auth-box button {
+            width: 100%; padding: 12px; margin-top: 15px;
+            background: #b30000; border: none; color: white;
+            font-family: 'Courier New', monospace; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+
+        .auth-box button:hover { background: #ff0000; box-shadow: 0 0 10px #ff0000; }
+
+        .switch-btn {
+            background: none !important; color: #666 !important;
+            text-decoration: underline; font-size: 0.8rem; margin-top: 20px;
+            box-shadow: none !important;
+        }
+        .switch-btn:hover { color: #aaa !important; }
+
+        /* Update Popup Specifics */
+        #update-popup .auth-box { border-color: #eee; }
+        #update-popup h2 { color: #eee; }
+        .checkbox-container {
+            display: block; margin: 15px 0; font-size: 0.8rem; color: #888; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <h1>FAZBEAR ENTERTAINMENT: SYSTEMS</h1>
+    <div id="security-layer">
+        
+        <div id="screen-register" class="auth-box hidden">
+            <h2>NEW EMPLOYEE</h2>
+            <p>Create your Fazbear ID.</p>
+            <input type="text" id="reg-user" placeholder="Create Username">
+            <input type="password" id="reg-pass" placeholder="Create Password">
+            <button onclick="handleRegister()">REGISTER ID</button>
+            <button class="switch-btn" onclick="showLogin()">Already have an ID?</button>
+        </div>
 
-    <div class="grid">
-        <a href="1/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 1</h3>
-        </a>
-        <a href="2/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 2</h3>
-        </a>
-        <a href="3/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 3</h3>
-        </a>
-        <a href="4/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 4</h3>
-        </a>
-        <a href="sl/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>Sister Location</h3>
-        </a>
-        <a href="ps/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>Pizzeria Sim</h3>
-        </a>
-        <a href="ucn/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>UCN</h3>
-        </a>
-        <a href="w/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>World</h3>
-        </a>
+        <div id="screen-login" class="auth-box hidden">
+            <h2>SECURITY CHECK</h2>
+            <p>Authorized Personnel Only.</p>
+            <input type="text" id="login-user" placeholder="Username">
+            <input type="password" id="login-pass" placeholder="Password">
+            <button onclick="handleLogin()">ACCESS SYSTEMS</button>
+            <button class="switch-btn" onclick="resetSystem()">[Reset Terminal Data]</button>
+        </div>
+
+        <div id="screen-popup" class="auth-box hidden">
+            <h2>NEW UPDATE</h2>
+            <p style="color: #ccc; margin: 20px 0; line-height: 1.5;">
+                System Patch 2.0 Installed.<br><br>
+                <strong>Click Alt + R</strong> to open the Cloaker Menu to change the tab name and image.
+            </p>
+            <label class="checkbox-container">
+                <input type="checkbox" id="popup-mute"> Never Show Again
+            </label>
+            <button onclick="closePopup()" style="background: #333;">OK</button>
+        </div>
     </div>
-<script src="renamer.js"></script>
+
+    <div id="main-system" class="hidden">
+        <h1>FAZBEAR ENTERTAINMENT: SYSTEMS</h1>
+
+        <div class="grid">
+            <a href="1/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>FNAF 1</h3>
+            </a>
+            <a href="2/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>FNAF 2</h3>
+            </a>
+            <a href="3/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>FNAF 3</h3>
+            </a>
+            <a href="4/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>FNAF 4</h3>
+            </a>
+            <a href="sl/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>Sister Location</h3>
+            </a>
+            <a href="ps/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>Pizzeria Sim</h3>
+            </a>
+            <a href="ucn/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>UCN</h3>
+            </a>
+            <a href="w/index.html" class="game-card">
+                <div class="status">System Online</div>
+                <h3>World</h3>
+            </a>
+        </div>
+    </div>
+
+    <script src="renamer.js"></script>
+
+    <script>
+        // Hashing Function for Security
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        const UI = {
+            layer: document.getElementById('security-layer'),
+            reg: document.getElementById('screen-register'),
+            log: document.getElementById('screen-login'),
+            pop: document.getElementById('screen-popup'),
+            system: document.getElementById('main-system')
+        };
+
+        // 1. INITIALIZE ON LOAD
+        (function init() {
+            const userExists = localStorage.getItem('faz_user');
+            
+            if (!userExists) {
+                // No user -> Show Register
+                UI.reg.classList.remove('hidden');
+            } else {
+                // User exists -> Show Login
+                UI.log.classList.remove('hidden');
+            }
+        })();
+
+        // 2. REGISTER LOGIC
+        async function handleRegister() {
+            const u = document.getElementById('reg-user').value;
+            const p = document.getElementById('reg-pass').value;
+
+            if (!u || !p) return alert("Error: Fields cannot be empty.");
+
+            const hash = await sha256(p);
+            localStorage.setItem('faz_user', u);
+            localStorage.setItem('faz_pass', hash);
+
+            alert("ID Created. Please Login.");
+            showLogin();
+        }
+
+        // 3. LOGIN LOGIC
+        async function handleLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+
+            const savedU = localStorage.getItem('faz_user');
+            const savedP = localStorage.getItem('faz_pass');
+            
+            const inputHash = await sha256(p);
+
+            if (u === savedU && inputHash === savedP) {
+                // Success - Check for Popup
+                checkPopup();
+            } else {
+                alert("ACCESS DENIED: Credentials Invalid.");
+            }
+        }
+
+        // 4. POPUP LOGIC
+        function checkPopup() {
+            // Hide Login/Register screens
+            UI.log.classList.add('hidden');
+            UI.reg.classList.add('hidden');
+
+            const isMuted = localStorage.getItem('faz_mute_update');
+
+            if (isMuted === "true") {
+                // Skip popup, go straight to system
+                enterSystem();
+            } else {
+                // Show Popup
+                UI.pop.classList.remove('hidden');
+            }
+        }
+
+        function closePopup() {
+            const checkbox = document.getElementById('popup-mute');
+            if (checkbox.checked) {
+                localStorage.setItem('faz_mute_update', "true");
+            }
+            enterSystem();
+        }
+
+        // 5. ENTER SYSTEM (Reveal the Grid)
+        function enterSystem() {
+            UI.layer.style.display = 'none'; // Remove black overlay
+            UI.system.classList.remove('hidden'); // Show grid
+        }
+
+        // HELPER FUNCTIONS
+        function showLogin() {
+            UI.reg.classList.add('hidden');
+            UI.log.classList.remove('hidden');
+        }
+
+        function resetSystem() {
+            if(confirm("WARNING: This will delete your Saved ID and Reset the terminal. Continue?")) {
+                localStorage.removeItem('faz_user');
+                localStorage.removeItem('faz_pass');
+                localStorage.removeItem('faz_mute_update');
+                location.reload();
+            }
+        }
+    </script>
 </body>
 </html>
