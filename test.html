@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Class Project</title>
+    <link rel="icon" id="dynamic-favicon" href="https://www.google.com/favicon.ico">
+    <style>
+        body { font-family: sans-serif; background: #f0f0f0; padding: 50px; text-align: center; }
+        /* The Menu (Hidden by default) */
+        #cloak-menu {
+            display: none; /* HIDDEN */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            justify-content: center; align-items: center;
+        }
+        .menu-box {
+            background: white; padding: 20px; border-radius: 10px; width: 300px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .save-btn { background: #28a745; color: white; }
+        .cancel-btn { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>Press "Alt + R" to Rename this Tab</h1>
+    <p>This feature is hard-coded into this page.</p>
+
+    <div id="cloak-menu">
+        <div class="menu-box">
+            <h3>Tab Cloaker</h3>
+            <input type="text" id="new-title" placeholder="New Tab Name (e.g. Google Docs)">
+            <input type="text" id="new-icon" placeholder="New Icon URL">
+            <button class="save-btn" onclick="applyCloak()">Apply</button>
+            <button class="cancel-btn" onclick="closeMenu()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Listen for Keybind (Alt + R)
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey && e.key.toLowerCase() === 'r') {
+                e.preventDefault();
+                document.getElementById('cloak-menu').style.display = 'flex';
+            }
+        });
+
+        // 2. Apply Changes
+        function applyCloak() {
+            var title = document.getElementById('new-title').value;
+            var icon = document.getElementById('new-icon').value;
+
+            if (title) document.title = title;
+            
+            if (icon) {
+                var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+                link.type = 'image/x-icon';
+                link.rel = 'shortcut icon';
+                link.href = icon;
+                document.head.appendChild(link);
+            }
+
+            closeMenu();
+        }
+
+        // 3. Close Menu
+        function closeMenu() {
+            document.getElementById('cloak-menu').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
