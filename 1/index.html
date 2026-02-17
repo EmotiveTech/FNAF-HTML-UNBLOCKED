@@ -146,10 +146,43 @@
 </body>
 <!--Made by irv77-->
 <script>
+    // ==========================================
+    // 1. TAB RENAMER (Added Feature)
+    // ==========================================
+    console.log("Renamer Loaded");
+    document.addEventListener('keydown', function(e) {
+        // Check for Alt + R
+        if (e.altKey && e.key.toLowerCase() === 'r') {
+            e.preventDefault();
+            
+            // Ask for new title
+            let title = prompt("New Tab Name:", document.title);
+            if (title) document.title = title;
+
+            // Ask for new icon
+            let icon = prompt("New Icon URL (leave blank to skip):");
+            if (icon) {
+                // Remove old icons to ensure the new one works
+                let oldLinks = document.querySelectorAll("link[rel*='icon']");
+                oldLinks.forEach(l => l.remove());
+
+                let link = document.createElement('link');
+                link.type = 'image/x-icon';
+                link.rel = 'shortcut icon';
+                link.href = icon;
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+        }
+    });
+
+    // ==========================================
+    // 2. GAME LOADING LOGIC (Original)
+    // ==========================================
     const parts = 20;
-    let gametitle, runtimecanvas
+    let gametitle, runtimecanvas;
     gametitle = document.title;
     runtimecanvas = "resources/FNAF1HTML5.cch";
+
     // Prevents touchscreen move
     window.addEventListener("scroll", preventMotion, false);
     window.addEventListener("touchmove", preventMotion, false);
@@ -158,6 +191,7 @@
         event.preventDefault();
         event.stopPropagation();
     }
+
     // Fullscreen Key
     const pressedKeys = {};
     document.addEventListener('keydown', event => {
@@ -170,12 +204,16 @@
     document.addEventListener('keyup', (event) => {
         delete pressedKeys[event.key];
     });
-    // -----------------
+
+    // Main Load
     window.onload = function () {
         const map = new Map();
 
         function updateProgress(text, percent) {
-            document.title = percent + '% ' + gametitle
+            // Only update title if user hasn't renamed it yet
+            // (Optional: remove 'document.title' line below if you want custom name to stay forever)
+            document.title = percent + '% ' + gametitle; 
+            
             document.getElementById('percentage').innerHTML = percent + '%';
             document.getElementById('bar').style.width = percent + '%';
             document.getElementById('stage').innerHTML = text;
@@ -333,5 +371,5 @@
         });
     };
 </script>
-<script src="../renamer.js"></script>
+</html>
 </html>
