@@ -146,34 +146,115 @@
 </body>
 <!--Made by irv77-->
 <script>
-    // ==========================================
-    // 1. TAB RENAMER (Added Feature)
-    // ==========================================
-    console.log("Renamer Loaded");
+    // --- PASTE THIS INSIDE YOUR EXISTING SCRIPT TAG ---
+
+(function() {
+    // 1. SETUP HTML FOR THE MENU
+    const html = `
+    <div id="cloaker-menu" style="
+        display: none; 
+        position: fixed; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        background: #111; 
+        border: 2px solid #b30000; 
+        padding: 20px; 
+        z-index: 99999; 
+        font-family: 'Courier New', monospace; 
+        color: #eee; 
+        text-align: center;
+        box-shadow: 0 0 50px #000;
+        width: 300px;
+    ">
+        <h3 style="color: #b30000; margin-top: 0;">TAB CLOAKER</h3>
+        
+        <label style="font-size: 0.8rem;">TAB TITLE:</label><br>
+        <input type="text" id="cloak-title" placeholder="Google Drive" style="width: 90%; margin-bottom: 10px; padding: 5px; background: #000; color: #fff; border: 1px solid #333;"><br>
+        
+        <label style="font-size: 0.8rem;">ICON URL:</label><br>
+        <input type="text" id="cloak-icon" placeholder="URL here" style="width: 90%; margin-bottom: 15px; padding: 5px; background: #000; color: #fff; border: 1px solid #333;"><br>
+        
+        <button id="btn-cloak" style="background: #b30000; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">APPLY</button>
+        <button id="btn-reset-cloak" style="background: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-left: 5px;">RESET</button>
+        
+        <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Press Alt + R to Open / ESC to Close</div>
+    </div>
+    `;
+
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    document.body.appendChild(div);
+
+    const menu = document.getElementById('cloaker-menu');
+    const inputTitle = document.getElementById('cloak-title');
+    const inputIcon = document.getElementById('cloak-icon');
+    const btnApply = document.getElementById('btn-cloak');
+    const btnReset = document.getElementById('btn-reset-cloak');
+
+    function setFavicon(url) {
+        let link = document.querySelector("link[rel~='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.getElementsByTagName('head')[0].appendChild(link);
+        }
+        link.href = url;
+    }
+
+    function loadSettings() {
+        const savedTitle = localStorage.getItem('faz_cloak_title');
+        const savedIcon = localStorage.getItem('faz_cloak_icon');
+
+        if (savedTitle) {
+            document.title = savedTitle;
+            if(inputTitle) inputTitle.value = savedTitle;
+        }
+
+        if (savedIcon) {
+            setFavicon(savedIcon);
+            if(inputIcon) inputIcon.value = savedIcon;
+        }
+    }
+
+    function applyCloak() {
+        const t = inputTitle.value;
+        const i = inputIcon.value;
+
+        if (t) {
+            document.title = t;
+            localStorage.setItem('faz_cloak_title', t);
+        }
+        
+        if (i) {
+            setFavicon(i);
+            localStorage.setItem('faz_cloak_icon', i);
+        }
+        menu.style.display = 'none';
+    }
+
+    function resetCloak() {
+        localStorage.removeItem('faz_cloak_title');
+        localStorage.removeItem('faz_cloak_icon');
+        location.reload(); 
+    }
+
     document.addEventListener('keydown', function(e) {
-        // Check for Alt + R
         if (e.altKey && e.key.toLowerCase() === 'r') {
             e.preventDefault();
-            
-            // Ask for new title
-            let title = prompt("New Tab Name:", document.title);
-            if (title) document.title = title;
-
-            // Ask for new icon
-            let icon = prompt("New Icon URL (leave blank to skip):");
-            if (icon) {
-                // Remove old icons to ensure the new one works
-                let oldLinks = document.querySelectorAll("link[rel*='icon']");
-                oldLinks.forEach(l => l.remove());
-
-                let link = document.createElement('link');
-                link.type = 'image/x-icon';
-                link.rel = 'shortcut icon';
-                link.href = icon;
-                document.getElementsByTagName('head')[0].appendChild(link);
-            }
+            menu.style.display = 'block';
+        }
+        if (e.key === 'Escape') {
+            menu.style.display = 'none';
         }
     });
+
+    if(btnApply) btnApply.addEventListener('click', applyCloak);
+    if(btnReset) btnReset.addEventListener('click', resetCloak);
+
+    loadSettings();
+})();
+// --- END OF RENAMER CODE ---
 
     // ==========================================
     // 2. GAME LOADING LOGIC (Original)
