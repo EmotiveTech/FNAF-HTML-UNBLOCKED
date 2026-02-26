@@ -16,7 +16,7 @@
             padding: 40px;
             margin: 0;
             min-height: 100vh;
-            overflow-x: hidden; /* Prevents scrollbar from appearing when monitor flips */
+            overflow-x: hidden;
         }
 
         /* --- HEADER --- */
@@ -37,14 +37,15 @@
             margin: 0;
         }
 
-        /* --- GAME GRID (MAIN) --- */
+        /* --- GAME GRID --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            /* Changed to auto-fill so it scales better with many icons */
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
             max-width: 1000px;
             width: 100%;
-            margin-bottom: 100px; /* Space for monitor trigger */
+            margin-bottom: 100px;
         }
 
         .game-card {
@@ -58,7 +59,7 @@
             color: inherit;
             display: block; 
             position: relative;
-            z-index: 1; /* Lower than monitor */
+            z-index: 1;
         }
 
         .game-card:hover {
@@ -71,29 +72,66 @@
         .game-card h3 { margin: 10px 0; font-size: 1.1rem; }
         .status { font-size: 0.7rem; color: #666; text-transform: uppercase; }
 
-        /* --- MONITOR FLIP BUTTON (HOVER TRIGGER) --- */
+        /* --- MONITOR OVERLAY --- */
+        #camera-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 5000;
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            /* Added scrolling so icons don't bug out when there are many */
+            overflow-y: auto; 
+            padding-top: 60px;
+            padding-bottom: 100px;
+        }
+
+        #camera-overlay .grid {
+            border: 4px solid #333;
+            padding: 40px;
+            background: rgba(20, 20, 20, 0.95);
+            box-shadow: inset 0 0 100px #000;
+            max-width: 900px;
+        }
+        
+        #camera-overlay .game-card:hover {
+            border-color: #0088ff;
+            background: #001122;
+            box-shadow: 0 0 15px #0088ff;
+        }
+
+        /* CRT Static Label */
+        #camera-overlay::before {
+            content: "REC ●";
+            position: fixed; top: 20px; left: 30px;
+            color: #ff0000; font-size: 1.5rem; animation: blink 1s infinite;
+            pointer-events: none;
+            z-index: 6000;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- MONITOR TRIGGER --- */
         #monitor-trigger {
             position: fixed;
             bottom: 0;
             left: 20%; 
-            width: 60%; /* Wide trigger area */
+            width: 60%; 
             height: 40px;
-            background: rgba(50, 50, 50, 0.5); /* Semi-transparent */
+            background: rgba(50, 50, 50, 0.5);
             border: 2px solid #555;
             border-bottom: none;
             border-radius: 20px 20px 0 0;
-            cursor: default; /* Not a pointer because you don't click */
+            cursor: pointer;
             transition: 0.2s;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999; /* Highest Priority - Fits ON TOP of games */
+            z-index: 9999;
         }
 
         #monitor-trigger:hover {
             height: 60px;
-            background: #b30000; /* Red when hovering */
-            opacity: 1;
+            background: #b30000;
         }
 
         #monitor-trigger::after {
@@ -104,45 +142,7 @@
             pointer-events: none;
         }
 
-        /* --- CAMERA OVERLAY (NON-FNAF GAMES) --- */
-        #camera-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000;
-            z-index: 5000; /* Above games, below trigger */
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* CRT Static Effect */
-        #camera-overlay::before {
-            content: "REC ●";
-            position: absolute; top: 20px; left: 30px;
-            color: #ff0000; font-size: 1.5rem; animation: blink 1s infinite;
-            pointer-events: none;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-
-        #camera-overlay .grid {
-            border: 4px solid #333;
-            padding: 40px;
-            background: rgba(20, 20, 20, 0.95);
-            box-shadow: inset 0 0 100px #000;
-            max-width: 800px;
-        }
-        
-        /* Blue style for non-fnaf games */
-        #camera-overlay .game-card:hover {
-            border-color: #0088ff;
-            background: #001122;
-            box-shadow: 0 0 15px #0088ff;
-        }
-        #camera-overlay h1 {
-            color: #fff; border: none; text-shadow: none; margin-bottom: 20px;
-        }
-
-        /* --- POPUP STYLES --- */
+        /* --- POPUP --- */
         .hidden { display: none !important; }
         
         #popup-overlay {
@@ -158,20 +158,16 @@
             background: #333; color: white; border: none; padding: 10px 20px;
             margin-top: 15px; cursor: pointer; font-family: inherit;
         }
-        .popup-box button:hover { background: #555; }
-
     </style>
 </head>
 <body>
 
     <div id="popup-overlay" class="hidden">
         <div class="popup-box">
-            <h2>NEW UPDATE</h2>
+            <h2>SYSTEM UPDATED</h2>
             <p style="color: #ccc; margin: 20px 0;">
-                System Patch 3.4 Installed.<br><br>
-                <strong>Press Alt + R</strong> to rename this tab. To rename it, you enter the name and enter the URL of the website,<br>
-                <strong>click the button next to it and then click apply<br>
-                <strong>Hover the bottom bar</strong> to open the App Monitor.
+                Layout Fix 4.1 applied.<br><br>
+                Grid stability improved for high volume game counts.
             </p>
             <label style="color: #888; font-size: 0.8rem; cursor: pointer;">
                 <input type="checkbox" id="popup-mute"> Never Show Again
@@ -186,38 +182,17 @@
     </div>
 
     <div class="grid">
-        <a href="1/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 1</h3>
-        </a>
-        <a href="2/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 2</h3>
-        </a>
-        <a href="3/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 3</h3>
-        </a>
-        <a href="4/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>FNAF 4</h3>
-        </a>
-        <a href="ps/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>Pizzeria Sim</h3>
-        </a>
-        <a href="ucn/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>UCN</h3>
-        </a>
-        <a href="w/index.html" class="game-card">
-            <div class="status">System Online</div>
-            <h3>World</h3>
-        </a>
+        <a href="1/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 1</h3></a>
+        <a href="2/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 2</h3></a>
+        <a href="3/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 3</h3></a>
+        <a href="4/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 4</h3></a>
+        <a href="ps/index.html" class="game-card"><div class="status">System Online</div><h3>Pizzeria Sim</h3></a>
+        <a href="ucn/index.html" class="game-card"><div class="status">System Online</div><h3>UCN</h3></a>
+        <a href="w/index.html" class="game-card"><div class="status">System Online</div><h3>World</h3></a>
     </div>
 
     <div id="camera-overlay">
-        <h1>RESTRICTED FEED: EXTERNAL APPS</h1>
+        <h1 style="color:#fff; margin-bottom: 20px;">RESTRICTED FEED: EXTERNAL APPS</h1>
         <div class="grid">
             <a href="https://emotivetech.github.io/McVG/projects/bacon-may-die/game.html" class="game-card">
                 <div class="status" style="color: #0088ff;">Feed Active</div>
@@ -235,37 +210,38 @@
                 <div class="status" style="color: #0088ff;">Feed Active</div>
                 <h3>Bloxors</h3>
             </a>
-            <a href="minecraft/index.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="minecraft/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Minecraft</h3>
             </a>
-            <a href="chat/index.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="chat/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Live Chat</h3>
             </a>
-            <a href="https://mecvg.github.io/projects/flappy-bird/game.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="https://mecvg.github.io/projects/flappy-bird/game.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Flappy Bird</h3>
             </a>
-            <a href="https://emotivetech.github.io/dino3d/" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="https://emotivetech.github.io/dino3d/" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Dino Run 3D</h3>
             </a>
-            <a href="https://emotivetech.github.io/smash-karts.github.io/smash-karts/index.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="https://emotivetech.github.io/smash-karts.github.io/smash-karts/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Smash Karts</h3>
             </a>
-            <a href="https://emotivetech.github.io/other-unblocked.github.io/bob-the-robber.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="https://emotivetech.github.io/other-unblocked.github.io/bob-the-robber.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Bob The Robber 1</h3>
             </a>
-            <a href="https://emotivetech.github.io/McVG/projects/bobtherobber2/game.html" target="_blank" class="game-card">
+            <a href="https://emotivetech.github.io/McVG/projects/bobtherobber2/game.html" class="game-card">
                 <div class="status" style="color: #0088ff;">Feed Active</div>
                 <h3>Bob The Robber 2</h3>
             </a>
-            <a href="https://emotivetech.github.io/bob-therobber.github.io/file/index.html" class=game-card>
-                <dif class="status" style="color:#0088ff;">Feed Active</dif>
+            <a href="https://emotivetech.github.io/bob-therobber.github.io/file/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
                 <h3>Bob The Robber 4</h3>
+            </a>
         </div>
     </div>
 
@@ -290,35 +266,29 @@
             document.getElementById('popup-overlay').classList.add('hidden');
         }
 
-
         // --- MONITOR HOVER LOGIC ---
         const trigger = document.getElementById('monitor-trigger');
         const overlay = document.getElementById('camera-overlay');
         let isMonitorOpen = false;
-        let isLocked = false; // Prevents rapid flickering
+        let isLocked = false; 
 
         trigger.addEventListener('mouseenter', function() {
             if (isLocked) return;
-
-            // Lock interactions for 0.5 seconds to prevent spamming
             isLocked = true;
             setTimeout(() => { isLocked = false; }, 500);
 
             if (!isMonitorOpen) {
-                // OPEN MONITOR
                 overlay.style.display = 'flex';
-                trigger.style.background = '#0088ff'; // Change color to blue to indicate "Active"
-                trigger.innerHTML = "▼ HOVER TO CLOSE ▼"; // Text update (using innerHTML directly)
+                trigger.style.background = '#0088ff';
+                trigger.innerText = "▼ HOVER TO CLOSE ▼";
                 isMonitorOpen = true;
             } else {
-                // CLOSE MONITOR
                 overlay.style.display = 'none';
-                trigger.style.background = ''; // Reset color
-                trigger.innerHTML = ""; // Reset text (CSS ::after handles the default text)
+                trigger.style.background = '';
+                trigger.innerText = "";
                 isMonitorOpen = false;
             }
         });
-
     </script>
 </body>
 </html>
