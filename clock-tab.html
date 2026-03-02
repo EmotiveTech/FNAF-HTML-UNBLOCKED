@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamagotchi Clock Tab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffd1dc; /* Pastel pink background */
+            --screen-bg: #e0f7fa; /* Light cyan screen */
+            --pixel-color: #ff4081; /* Vibrant pink/magenta text */
+            --pixel-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+            --border-color: #ff79b0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+        }
+
+        .screen-container {
+            background-color: var(--screen-bg);
+            border: 8px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 
+                inset 8px 8px 0px rgba(255,255,255,0.8),
+                inset -8px -8px 0px rgba(0,0,0,0.1),
+                10px 10px 0px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-shadow: var(--pixel-shadow);
+        }
+
+        .date-display {
+            color: #00bcd4; /* Cyan accent for date */
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .time-display {
+            color: var(--pixel-color);
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .colon {
+            margin: 0 10px;
+            animation: blink 1s step-end infinite;
+        }
+
+        .ampm-display {
+            color: #7c4dff; /* Purple accent for AM/PM */
+            font-size: 1.5rem;
+            align-self: flex-end;
+            margin-top: -10px;
+            margin-right: 20px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Responsive sizing */
+        @media (max-width: 600px) {
+            .time-display { font-size: 2.5rem; }
+            .date-display { font-size: 0.9rem; }
+            .ampm-display { font-size: 1rem; }
+            .screen-container { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="screen-container">
+        <div class="date-display" id="date">JAN 01 SUN</div>
+        <div class="time-display">
+            <span id="hours">12</span>
+            <span class="colon">:</span>
+            <span id="minutes">00</span>
+        </div>
+        <div class="ampm-display" id="ampm">AM</div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            
+            // Format Time
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // '0' should be '12'
+            
+            // Add leading zero to minutes if needed
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            // Add leading zero to hours for that classic digital look
+            hours = hours < 10 ? '0' + hours : hours;
+
+            // Format Date
+            const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            const dateString = months[now.getMonth()] + ' ' + (now.getDate() < 10 ? '0' + now.getDate() : now.getDate()) + ' ' + days[now.getDay()];
+
+            // Update DOM
+            document.getElementById('hours').innerText = hours;
+            document.getElementById('minutes').innerText = minutes;
+            document.getElementById('ampm').innerText = ampm;
+            document.getElementById('date').innerText = dateString;
+        }
+
+        // Initialize clock immediately, then update every second
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
