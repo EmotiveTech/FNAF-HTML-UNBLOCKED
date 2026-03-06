@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Fazbear System Changelog</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- BACK BUTTON --- */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #111;
+            color: #eee;
+            border: 2px solid #333;
+            padding: 10px 20px;
+            font-family: inherit;
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            border-color: #0088ff;
+            background: #001122;
+            color: #fff;
+            box-shadow: 0 0 10px #0088ff;
+        }
+
+        /* --- HEADER --- */
+        .header-container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #b30000;
+            text-shadow: 2px 2px 5px #000;
+            letter-spacing: 5px;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* --- LOG CONTAINER (SCROLLABLE) --- */
+        .log-container {
+            width: 100%;
+            max-width: 800px;
+            background: #111;
+            border: 2px solid #333;
+            padding: 20px;
+            height: 60vh; /* Limits height to 60% of the screen */
+            overflow-y: auto; /* Adds the scrollbar when text overflows */
+            box-shadow: inset 0 0 20px #000;
+        }
+
+        /* Style the scrollbar to match the theme */
+        .log-container::-webkit-scrollbar {
+            width: 12px;
+        }
+        .log-container::-webkit-scrollbar-track {
+            background: #050505;
+            border-left: 2px solid #333;
+        }
+        .log-container::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: #b30000;
+        }
+
+        /* --- LOG ENTRIES --- */
+        .entry {
+            border-bottom: 1px dashed #444;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .date {
+            color: #0088ff;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">◄ BACK TO SYSTEM</a>
+
+    <div class="header-container">
+        <h1>SYSTEM CHANGELOG</h1>
+    </div>
+
+    <div class="log-container">
+        
+        <div class="entry">
+            <span class="date">LATEST UPDATE</span>
+            <p>
+                I have updated the slower games so that they boot quicker, the way you do this is by opening a game, it will not boot quicker on the first boot but after the first boot, it will load within 30 seconds (FNAF 2 did for me).
+            </p>
+        </div>
+
+        </div>
+
+</body>
+</html>
