@@ -19,6 +19,29 @@
             overflow-x: hidden;
         }
 
+        /* --- CHANGELOG BUTTON --- */
+        .changelog-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #111;
+            color: #eee;
+            border: 2px solid #333;
+            padding: 10px 20px;
+            font-family: inherit;
+            text-decoration: none;
+            transition: 0.3s;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        .changelog-btn:hover {
+            border-color: #b30000;
+            background: #1a0000;
+            color: #fff;
+            box-shadow: 0 0 10px #b30000;
+        }
+
         /* --- HEADER --- */
         .header-container {
             width: 100%;
@@ -28,6 +51,7 @@
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
             margin-bottom: 30px;
+            margin-top: 20px; /* Added slight margin so it doesn't overlap the new button */
         }
 
         h1 {
@@ -35,12 +59,12 @@
             text-shadow: 2px 2px 5px #000;
             letter-spacing: 5px;
             margin: 0;
+            text-align: center;
         }
 
         /* --- GAME GRID --- */
         .grid {
             display: grid;
-            /* Changed to auto-fill so it scales better with many icons */
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
             max-width: 1000px;
@@ -80,7 +104,6 @@
             display: none; 
             flex-direction: column;
             align-items: center;
-            /* Added scrolling so icons don't bug out when there are many */
             overflow-y: auto; 
             padding-top: 60px;
             padding-bottom: 100px;
@@ -162,12 +185,16 @@
 </head>
 <body>
 
+    <a href="changelog.html" class="changelog-btn">CHANGELOG</a>
+
     <div id="popup-overlay" class="hidden">
         <div class="popup-box">
-            <h2>Please Answer This 4 Question Servey</h2>
-            <p style="color: #ccc; margin: 20px 0;">
-                <a href="https://forms.gle/LFwY5skru2zwPfxx9">Click here to answer the servey</a>
-            </p>
+            <h2></h2>
+            <div style="color: #ccc; margin: 20px 0;">
+                <h2>I have updated the slower games so that they boot quicker</h2>
+                <h2>To view full Changelog, click Changelog in the top right</h2>
+                <a href="https://forms.gle/LFwY5skru2zwPfxx9" style="color:#0088ff;">Click here to answer the survey</a>
+            </div>
             <label style="color: #888; font-size: 0.8rem; cursor: pointer;">
                 <input type="checkbox" id="popup-mute"> Never Show Again
             </label>
