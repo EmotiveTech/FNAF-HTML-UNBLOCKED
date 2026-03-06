@@ -146,6 +146,19 @@
 </body>
 <!--Made by irv77-->
 <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      // The '../' goes up one level to the root folder to find sw.js
+      navigator.serviceWorker.register('../sw.js')
+        .then(function(registration) {
+          console.log('Service Worker registered successfully!', registration.scope);
+        }, function(err) {
+          console.log('Service Worker registration failed:', err);
+        });
+    });
+  }
+</script>
+<script>
     // --- FAZBEAR TAB RENAMER V3.0 (AUTO-GRABBER) ---
 
 (function() {
