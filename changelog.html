@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Fazbear System Changelog</title>
     <style>
         body {
@@ -16,10 +15,9 @@
             padding: 40px;
             margin: 0;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* --- BACK BUTTON --- */
+        /* --- NAVIGATION --- */
         .back-btn {
             position: absolute;
             top: 20px;
@@ -45,12 +43,11 @@
         .header-container {
             width: 100%;
             max-width: 800px;
-            display: flex;
-            justify-content: center;
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
             margin-bottom: 30px;
-            margin-top: 20px;
+            margin-top: 40px;
+            text-align: center;
         }
 
         h1 {
@@ -58,80 +55,135 @@
             text-shadow: 2px 2px 5px #000;
             letter-spacing: 5px;
             margin: 0;
-            text-align: center;
         }
 
-        /* --- LOG CONTAINER (SCROLLABLE) --- */
-        .log-container {
+        /* --- CONTENT CONTAINERS --- */
+        .content-box {
             width: 100%;
             max-width: 800px;
             background: #111;
-            border: 2px solid #333;
-            padding: 20px;
-            height: 60vh; /* Limits height to 60% of the screen */
-            overflow-y: auto; /* Adds the scrollbar when text overflows */
-            box-shadow: inset 0 0 20px #000;
+            border: 2px solid #222;
+            padding: 30px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
         }
 
-        /* Style the scrollbar to match the theme */
-        .log-container::-webkit-scrollbar {
-            width: 12px;
-        }
-        .log-container::-webkit-scrollbar-track {
-            background: #050505;
-            border-left: 2px solid #333;
-        }
-        .log-container::-webkit-scrollbar-thumb {
-            background: #333;
-        }
-        .log-container::-webkit-scrollbar-thumb:hover {
-            background: #b30000;
-        }
-
-        /* --- LOG ENTRIES --- */
-        .entry {
+        h2 {
+            color: #fff;
+            margin-top: 0;
             border-bottom: 1px dashed #444;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .entry:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
+            padding-bottom: 10px;
         }
 
         .date {
-            color: #0088ff;
-            font-weight: bold;
+            color: #888;
             font-size: 0.9rem;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
             display: block;
         }
 
-        p {
+        ul {
             line-height: 1.6;
-            margin: 0;
+            color: #ccc;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* --- PAST UPDATES (ACCORDION) --- */
+        details {
+            width: 100%;
+            max-width: 800px;
+            background: #0a0a0a;
+            border: 2px solid #222;
+            padding: 10px 30px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        details[open] {
+            padding-bottom: 30px;
+            border-color: #444;
+        }
+
+        summary {
+            color: #888;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px 0;
+            outline: none;
+            list-style: none; /* Hide default arrow in some browsers */
+            display: flex;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none; /* Hide default arrow in webkit */
+        }
+
+        summary::before {
+            content: "►";
+            color: #b30000;
+            margin-right: 15px;
+            font-size: 1rem;
+            transition: 0.3s transform;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        summary:hover {
+            color: #fff;
+        }
+
+        .past-update-block {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #333;
+        }
+
+        .past-update-block:first-of-type {
+            border-top: none;
         }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="back-btn">◄ BACK TO SYSTEM</a>
+    <a href="index.html" class="back-btn">◄ RETURN TO TERMINAL</a>
 
     <div class="header-container">
         <h1>SYSTEM CHANGELOG</h1>
     </div>
 
-    <div class="log-container">
-        
-        <div class="entry">
-            <span class="date">LATEST UPDATE</span>
-            <p>
-                I have updated the slower games so that they boot quicker, the way you do this is by opening a game, it will not boot quicker on the first boot but after the first boot, it will load within 30 seconds (FNAF 2 did for me).
-            </p>
-        </div>
+    <div class="content-box">
+        <h2>UPDATE V2.0 - Performance & Optimization</h2>
+        <span class="date">October 24, 2023</span>
+        <ul>
+            <li><strong>Fixed FNAF 1</strong> Last Update broke the loading system of FNAF 1 so i have fixed it</li>
+            <li><strong>Faster Boot Times:</strong> Optimized the loading sequence for the heavier/slower games so they boot much quicker on restricted networks.</li>
+            <li><strong>New Tab Cloaker:</strong> Added Tab Cloaker V3 with auto-icon grabbing and quick-select presets for Google Drive, Classroom, and Canvas.</li>
+            <li><strong>Monitor UI:</strong> Refined the hover-to-flip monitor trigger so it feels more responsive.</li>
+            <li>Added a one-time update notification system for returning personnel.</li>
+        </ul>
+    </div>
 
+    <details>
+        <summary>PAST UPDATES ARCHIVE</summary>
+
+        <div class="past-update-block">
+            <h3 style="color: #bbb; margin-top: 0;">UPDATE V1.0 - Initial System Boot</h3>
+            <span class="date">January 31, 2026</span>
+            <ul>
+                <li>Initial launch of the Fazbear HTML Launcher.</li>
+                <li>Added base FNAF 1 through 4, Pizzeria Simulator, UCN, and FNAF World.</li>
+                <li>Established the core terminal UI and retro design language.</li>
+            </ul>
         </div>
+    </details>
 
 </body>
 </html>
