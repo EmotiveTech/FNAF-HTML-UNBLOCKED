@@ -51,7 +51,7 @@
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
             margin-bottom: 30px;
-            margin-top: 20px; /* Added slight margin so it doesn't overlap the new button */
+            margin-top: 20px;
         }
 
         h1 {
@@ -284,9 +284,25 @@
     <script src="renamer.js"></script>
 
     <script>
+        // --- VERSION CONTROL ---
+        // Change this string (e.g., "v2", "v3", "update-1.5") every time you want the popup to show again!
+        const CURRENT_VERSION = "v2"; 
+        
+        // Check what version the player's browser remembers
+        const savedVersion = localStorage.getItem('faz_system_version');
+        
+        // If the versions don't match, it means you updated the site!
+        if (savedVersion !== CURRENT_VERSION) {
+            // Delete their old "Never Show Again" save
+            localStorage.removeItem('faz_mute_update');
+            // Save the new version number so it doesn't keep popping up every time they refresh
+            localStorage.setItem('faz_system_version', CURRENT_VERSION);
+        }
+
         // --- POPUP LOGIC ---
         (function checkPopup() {
             const isMuted = localStorage.getItem('faz_mute_update');
+            // Only show the popup if they haven't muted this specific version
             if (isMuted !== "true") {
                 document.getElementById('popup-overlay').classList.remove('hidden');
             }
@@ -294,6 +310,7 @@
 
         function closePopup() {
             const checkbox = document.getElementById('popup-mute');
+            // If they checked the box, mute the popup for this version
             if (checkbox.checked) {
                 localStorage.setItem('faz_mute_update', "true");
             }
