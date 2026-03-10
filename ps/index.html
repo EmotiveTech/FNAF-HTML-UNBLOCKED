@@ -53,464 +53,111 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 0 200px rgba(0,0,0,0.95) inset;
             pointer-events: none;
+            z-index: 5;
         }
 
-        .glitch {
-            position: absolute;
-            background-image: url(resources/background.gif);
-            background-position: center;
-            background-size: 50vw;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            opacity: 0.75;
-            z-index: -1;
-        }
-
-        canvas {
-            display: none;
-            user-select: none;
-        }
-
-        #title {
-            position: absolute;
-            top: 10vh;
-            left: 5vw;
-            z-index: 1;
-            height: 20vh;
-        }
-
-        #animatronic {
-            position: absolute;
-            top: -5vh;
-            right: 7vw;
-            height: 120vh;
-        }
-
-        .loader {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            left: 50%;
-            transform: translate(-50%, 0);
-            bottom: 12vh;
-            z-index: 1;
-            color: white;
-            font-family: monospace;
+        /* --- Custom Loading UI --- */
+        #progress-container {
+            z-index: 10;
+            color: #44ff44;
+            font-family: 'Courier New', Courier, monospace;
             text-align: center;
-            font-weight: lighter;
-            width: 85vw;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border: 2px solid #228822;
+            box-shadow: 0 0 20px #228822;
+            border-radius: 5px;
         }
-
-        .loader h1 {
-            margin: 0;
-            font-size: 5vw;
-        }
-
-        .loader hr{
-            margin: 0;
-            border: white solid 0.1vw;
-            width: 0%;
-        }
-
-        .loader h2 {
-            margin: 1vh 0;
-            font-size: 1.4vw;
-        }
+        
+        #progress-container h2 { margin-top: 0; }
+        #progress-container h3 { margin-bottom: 0; font-size: 2rem; }
     </style>
 </head>
 
 <body>
-    <canvas id="MMFCanvas" width="1920" height="1080"> Your browser does not support Canvas, Please try again.</canvas>
-    <div class="selection" id="selection">
-        <img id="title" src="resources/title.png">
-        <img id="animatronic" src="resources/animatronic.png">
-        <div class="loader">
-            <h1 id="percentage">0%</h1>
-            <hr id="bar">
-            <h2 id="stage">STARTING UP...</h2>
-        </div>
-        <a href="https://discord.gg/xuu8TnSY4b">
-            <div class="launcher-text"><img src="resources/launcher-text.png" style="width: 45vw;"></div>
-        </a>
+    <div class="vignette"></div>
+
+    <div id="progress-container">
+        <h2 id="loading-text">SYSTEM BOOT SEQUENCE...</h2>
+        <h3 id="loading-percent">0%</h3>
     </div>
-    <div class="glitch"></div>
-    <img src="resources/vignette.png" class="vignette">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-</body>
-<!--Made by irv77-->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      // The '../' goes up one level to the root folder to find sw.js
-      navigator.serviceWorker.register('../sw.js')
-        .then(function(registration) {
-          console.log('Service Worker registered successfully!', registration.scope);
-        }, function(err) {
-          console.log('Service Worker registration failed:', err);
-        });
-    });
-  }
-</script>
-<script>
-    // --- FAZBEAR TAB RENAMER V3.0 (AUTO-GRABBER) ---
 
-(function() {
-    // 1. SETUP HTML FOR THE MENU
-    const html = `
-    <div id="cloaker-menu" style="
-        display: none; 
-        position: fixed; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        background: #111; 
-        border: 2px solid #b30000; 
-        padding: 20px; 
-        z-index: 99999; 
-        font-family: 'Courier New', monospace; 
-        color: #eee; 
-        text-align: center;
-        box-shadow: 0 0 50px #000;
-        width: 350px;
-    ">
-        <h3 style="color: #b30000; margin-top: 0;">TAB CLOAKER V3</h3>
-        
-        <label style="font-size: 0.8rem; color: #888;">QUICK SELECT:</label><br>
-        <select id="cloak-preset" style="width: 95%; margin-bottom: 15px; padding: 5px; background: #222; color: #fff; border: 1px solid #444;">
-            <option value="">-- Choose a Disguise --</option>
-            <option value="Google Drive|https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">Google Drive</option>
-            <option value="Google Classroom|https://ssl.gstatic.com/classroom/favicon.png">Google Classroom</option>
-            <option value="Google Docs|https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">Google Docs</option>
-            <option value="My Drive - Google Drive|https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">My Drive</option>
-            <option value="Inbox (1) - Gmail|https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico">Gmail</option>
-            <option value="Wikipedia|https://en.wikipedia.org/static/favicon/wikipedia.ico">Wikipedia</option>
-            <option value="Canvas|https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico">Canvas</option>
-            <option value="Schoology|https://ui.schoology.com/design-system/assets/favicon-d123.ico">Schoology</option>
-        </select>
-        
-        <hr style="border-color: #333; margin: 10px 0;">
-
-        <label style="font-size: 0.8rem;">TAB TITLE:</label><br>
-        <input type="text" id="cloak-title" placeholder="e.g. Math Notes" style="width: 90%; margin-bottom: 10px; padding: 5px; background: #000; color: #fff; border: 1px solid #333;"><br>
-        
-        <label style="font-size: 0.8rem;">WEBSITE ICON GRABBER:</label><br>
-        <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 15px;">
-            <input type="text" id="cloak-domain" placeholder="e.g. roblox.com" style="width: 60%; padding: 5px; background: #000; color: #fff; border: 1px solid #333;">
-            <button id="btn-grab" style="width: 30%; background: #444; color: white; border: none; cursor: pointer; font-size: 0.7rem;">GET ICON</button>
-        </div>
-
-        <input type="hidden" id="cloak-icon-url">
-        
-        <div style="margin-bottom: 15px;">
-            <img id="icon-preview" src="" style="width: 32px; height: 32px; display: none; border: 1px solid #555;">
-        </div>
-        
-        <button id="btn-cloak" style="background: #b30000; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">APPLY</button>
-        <button id="btn-reset-cloak" style="background: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-left: 5px;">RESET</button>
-        
-        <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Press Alt + R to Open / ESC to Close</div>
-    </div>
-    `;
-
-    // Add to body
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    document.body.appendChild(div);
-
-    // --- VARIABLES ---
-    const menu = document.getElementById('cloaker-menu');
-    const inputTitle = document.getElementById('cloak-title');
-    const inputDomain = document.getElementById('cloak-domain');
-    const inputIconUrl = document.getElementById('cloak-icon-url');
-    const selectPreset = document.getElementById('cloak-preset');
-    const imgPreview = document.getElementById('icon-preview');
-    
-    const btnGrab = document.getElementById('btn-grab');
-    const btnApply = document.getElementById('btn-cloak');
-    const btnReset = document.getElementById('btn-reset-cloak');
-
-    // --- FUNCTIONS ---
-
-    function setFavicon(url) {
-        let link = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.getElementsByTagName('head')[0].appendChild(link);
-        }
-        link.href = url;
-    }
-
-    function loadSettings() {
-        const savedTitle = localStorage.getItem('faz_cloak_title');
-        const savedIcon = localStorage.getItem('faz_cloak_icon');
-
-        if (savedTitle) {
-            document.title = savedTitle;
-            inputTitle.value = savedTitle;
-        }
-
-        if (savedIcon) {
-            setFavicon(savedIcon);
-            inputIconUrl.value = savedIcon;
-            showPreview(savedIcon);
-        }
-    }
-
-    function showPreview(url) {
-        imgPreview.src = url;
-        imgPreview.style.display = 'inline-block';
-    }
-
-    // 1. PRESET HANDLER
-    selectPreset.addEventListener('change', function() {
-        const val = this.value;
-        if(!val) return;
-        
-        const parts = val.split('|'); // Split "Name|URL"
-        inputTitle.value = parts[0];
-        inputIconUrl.value = parts[1];
-        showPreview(parts[1]);
-    });
-
-    // 2. DOMAIN GRABBER HANDLER
-    btnGrab.addEventListener('click', function() {
-        const domain = inputDomain.value.trim();
-        if(!domain) return;
-
-        // Use Google's S2 Service to fetch favicon
-        const iconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        
-        inputIconUrl.value = iconUrl;
-        showPreview(iconUrl);
-    });
-
-    // 3. APPLY SETTINGS
-    function applyCloak() {
-        const t = inputTitle.value;
-        const i = inputIconUrl.value;
-
-        if (t) {
-            document.title = t;
-            localStorage.setItem('faz_cloak_title', t);
-        }
-        
-        if (i) {
-            setFavicon(i);
-            localStorage.setItem('faz_cloak_icon', i);
-        }
-
-        menu.style.display = 'none';
-    }
-
-    // 4. RESET
-    function resetCloak() {
-        localStorage.removeItem('faz_cloak_title');
-        localStorage.removeItem('faz_cloak_icon');
-        location.reload(); 
-    }
-
-    // --- KEY LISTENERS ---
-    document.addEventListener('keydown', function(e) {
-        if (e.altKey && e.key.toLowerCase() === 'r') {
-            e.preventDefault();
-            menu.style.display = 'block';
-        }
-        if (e.key === 'Escape') {
-            menu.style.display = 'none';
-        }
-    });
-
-    btnApply.addEventListener('click', applyCloak);
-    btnReset.addEventListener('click', resetCloak);
-
-    // Load on start
-    loadSettings();
-
-})();
-    
-    const parts = 20;
-    let gametitle, runtimecanvas
-    gametitle = document.title;
-    runtimecanvas = "resources/fnafps.cch";
-    // Prevents touchscreen move
-    window.addEventListener("scroll", preventMotion, false);
-    window.addEventListener("touchmove", preventMotion, false);
-    function preventMotion(event) {
-        window.scrollTo(0, 0);
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    // Fullscreen Key
-    const pressedKeys = {};
-    document.addEventListener('keydown', event => {
-        pressedKeys[event.key] = true;
-        if (pressedKeys['-'] && pressedKeys['=']) {
-            document.querySelector('canvas').requestFullscreen();
-            delete pressedKeys[event.key];
-        }
-    });
-    document.addEventListener('keyup', (event) => {
-        delete pressedKeys[event.key];
-    });
-    // -----------------
-    window.onload = function () {
-        const map = new Map();
-
-        function updateProgress(text, percent) {
-            document.title = percent + '% ' + gametitle
-            document.getElementById('percentage').innerHTML = percent + '%';
-            document.getElementById('bar').style.width = percent + '%';
-            document.getElementById('stage').innerHTML = text;
-        }
-
-        async function intercept() {
-            const ogfetch = window.fetch;
-            window.fetch = async function (input, init) {
-                if (typeof input === 'string' && input.startsWith('resources/')) {
-                    const fileName = input.split('/').pop();
-                    if (map.has(fileName)) {
-                        return ogfetch(map.get(fileName), init);
-                    }
-                }
-                return ogfetch(input, init);
-            };
-
-            const ogopen = XMLHttpRequest.prototype.open;
-            XMLHttpRequest.prototype.open = function (method, url) {
-                if (url.startsWith('resources/')) {
-                    const fileName = url.split('/').pop();
-                    if (map.has(fileName)) {
-                        url = map.get(fileName);
-                    }
-                }
-                return ogopen.apply(this, arguments);
-            };
-
-            const types = [HTMLImageElement, HTMLAudioElement, HTMLVideoElement];
-            for (const Tag of types) {
-                const descriptor = Object.getOwnPropertyDescriptor(Tag.prototype, 'src');
-                if (descriptor && descriptor.set) {
-                    Object.defineProperty(Tag.prototype, 'src', {
-                        configurable: true,
-                        enumerable: true,
-                        get: descriptor.get,
-                        set: function (val) {
-                            if (typeof val === 'string' && val.startsWith('resources/')) {
-                                const fileName = val.split('/').pop();
-                                if (map.has(fileName)) {
-                                    val = map.get(fileName);
-                                }
-                            }
-                            descriptor.set.call(this, val);
-                        }
-                    });
-                }
-            }
-        }
-
-        async function extract() {
-            const res = await fetch("resources.zip");
-
-            const contentLength = res.headers.get("Content-Length");
-            const total = parseInt(contentLength, 10);
-            const reader = res.body.getReader();
-            let loaded = 0;
-            const chunks = [];
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                chunks.push(value);
-                loaded += value.length;
-                updateProgress('RETURNING GEARS...', Math.floor((loaded / total / 2) * 100));
-            }
-
-            const arrayBuffer = await new Blob(chunks).arrayBuffer();
-            const zip = await JSZip.loadAsync(arrayBuffer);
-            const files = Object.keys(zip.files).filter(name => !zip.files[name].dir);
-            const totalFiles = files.length;
-
-            for (let i = 0; i < totalFiles; i++) {
-                const file = zip.files[files[i]];
-                const blob = await file.async("blob");
-                const url = URL.createObjectURL(blob);
-                map.set(files[i], url);
-                updateProgress('BOOTING UP ARCHIVE...', Math.floor(((i + 1) / totalFiles / 2) * 100 + 50));
-            }
-        }
-
-        async function wedone() {
-            await extract();
-            await intercept();
-
-            const script = document.createElement('script');
-            script.src = 'src/Runtime.js';
-            script.onload = () => {
-                new Runtime("MMFCanvas", runtimecanvas);
-            };
-            document.getElementById('MMFCanvas').style.display = 'block';
-            document.getElementById('selection').style.display = 'none';
-            document.title = gametitle;
-            document.head.appendChild(script);
-        }
-
+    <script>
         const originalFetch = window.fetch;
+        const parts = 20; // Matches your resources.zip.part1 through part20 files
+
+        function updateProgress(message, percent) {
+            const textEl = document.getElementById('loading-text');
+            const percentEl = document.getElementById('loading-percent');
+            if (textEl) textEl.innerText = message;
+            if (percentEl) percentEl.innerText = percent + "%";
+        }
 
         function mergeFiles(fileParts) {
             return new Promise((resolve, reject) => {
-                let buffers = [];
-                let totalSize = 0;
                 let loadedSize = 0;
-                Promise.all(fileParts.map(part =>
-                    fetch(part, { method: 'HEAD' }).then(res => {
-                        try {
-                            if (!res.ok) throw new Error("Missing part: " + part);
-                            return parseInt(res.headers.get("Content-Length") || "0", 10);
-                        } catch (error) { document.getElementById('stage').innerHTML = "ERROR: MISSING FILE(S)..." }
-                    })
-                )).then(sizes => {
-                    totalSize = sizes.reduce((a, b) => a + b, 0);
-                    function fetchPart(index) {
-                        if (index >= fileParts.length) {
-                            let mergedBlob = new Blob(buffers);
-                            let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            resolve(mergedFileUrl);
-                            return;
-                        }
+                
+                // Changed to LET so it can be cleared from RAM later
+                let buffers = [];
 
-                        fetch(fileParts[index]).then((response) => {
-                            if (!response.ok) throw new Error("Missing part: " + fileParts[index]);
-                            return response.arrayBuffer();
-                        }).then((data) => {
-                            buffers.push(data);
-                            loadedSize += data.byteLength;
-                            updateProgress('LOCATING ARCHIVE...', Math.floor((loadedSize / totalSize / 2) * 100));
-                            fetchPart(index + 1);
-                        }).catch(reject);
+                function fetchPart(index) {
+                    if (index >= fileParts.length) {
+                        updateProgress('INITIALIZING ENGINE...', 100);
+                        
+                        let mergedBlob = new Blob(buffers);
+                        let mergedFileUrl = URL.createObjectURL(mergedBlob);
+                        
+                        // --- AGGRESSIVE MEMORY CLEANUP ---
+                        // Tell the browser to delete the raw buffer data to prevent crashes!
+                        buffers = null;
+                        
+                        resolve(mergedFileUrl);
+                        return;
                     }
 
-                    fetchPart(0);
-                }).catch(reject);
+                    fetch(fileParts[index]).then((response) => {
+                        if (!response.ok) throw new Error("Missing part: " + fileParts[index]);
+                        return response.arrayBuffer();
+                    }).then((data) => {
+                        buffers.push(data);
+                        loadedSize += data.byteLength;
+                        
+                        let percent = Math.floor(((index + 1) / fileParts.length) * 95);
+                        updateProgress('LOCATING ARCHIVE PARTS...', percent);
+                        
+                        fetchPart(index + 1);
+                    }).catch(reject);
+                }
+
+                fetchPart(0);
             });
         }
 
         function getParts(file, start, end) {
-            let parts = [];
+            let partsArr = [];
             for (let i = start; i <= end; i++) {
-                parts.push(file + ".part" + i);
+                partsArr.push(file + ".part" + i);
             }
-            return parts;
+            return partsArr;
         }
+
+        function wedone() {
+            // Hide the loading screen
+            document.getElementById('progress-container').style.display = 'none';
+            
+            // Boot the actual game engine
+            let script = document.createElement('script');
+            script.src = 'Runtime.js';
+            document.body.appendChild(script);
+        }
+
+        // Start fetching and merging the 20 parts
         Promise.all([
-            mergeFiles(getParts("src/resources.zip", 1, parts))
+            mergeFiles(getParts("resources.zip", 1, parts))
         ]).then(([resources]) => {
             window.fetch = async function (url, ...args) {
                 if (url.endsWith("resources.zip")) {
@@ -520,7 +167,11 @@
                 }
             };
             wedone();
+        }).catch(error => {
+            updateProgress("BOOT FAILURE - MISSING FILES", 0);
+            console.error(error);
         });
-    };
-</script>
+    </script>
+</body>
+
 </html>
