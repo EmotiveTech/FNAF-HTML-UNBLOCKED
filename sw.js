@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fnaf-all-games-cache-v1';
+const CACHE_NAME = 'fnaf-all-games-cache-v1.2';
 
 // Only pre-cache the lightweight HTML files for each game folder
 // MAKE SURE your repo name matches! Change FNAF-HTML-UNBLOCKED if you renamed your repo.
