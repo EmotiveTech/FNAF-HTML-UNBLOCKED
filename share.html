@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazbear P2P Network Transfer</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        h1 { color: #b30000; letter-spacing: 5px; text-shadow: 2px 2px 5px #000; margin-bottom: 5px; }
+        .subtitle { color: #888; font-size: 0.8rem; margin-bottom: 30px; }
+
+        .menu-container {
+            background: #111; border: 2px solid #333; padding: 40px;
+            box-shadow: inset 0 0 20px #000; width: 450px; position: relative;
+        }
+
+        .btn {
+            background: #222; color: white; border: 2px solid #555; padding: 15px 30px;
+            margin: 10px; cursor: pointer; font-family: inherit; font-size: 1.1rem;
+            font-weight: bold; transition: 0.3s; width: 80%;
+        }
+
+        .btn:hover { background: #b30000; border-color: #ff0000; box-shadow: 0 0 15px #b30000; }
+        .btn:disabled { background: #111; border-color: #333; color: #555; cursor: not-allowed; box-shadow: none; }
+
+        .input-box {
+            background: #000; color: #fff; border: 1px solid #0088ff; padding: 15px;
+            width: 60%; margin-bottom: 20px; font-family: inherit; font-size: 1.5rem;
+            text-align: center; letter-spacing: 5px; text-transform: uppercase;
+        }
+
+        /* --- TERMINAL LOG --- */
+        #terminal-log {
+            background: #000; border: 1px solid #333; height: 120px; width: 90%;
+            margin: 20px auto 0 auto; overflow-y: auto; text-align: left;
+            padding: 10px; font-size: 0.8rem; color: #00ff00; box-sizing: border-box;
+        }
+        .log-error { color: #ff0000; }
+        .log-sys { color: #0088ff; }
+
+        /* --- PULSE ANIMATION --- */
+        .pulse { animation: pulsing 1.5s infinite; border-color: #0088ff; color: #0088ff; }
+        @keyframes pulsing {
+            0% { box-shadow: 0 0 5px #0088ff; transform: scale(1); }
+            50% { box-shadow: 0 0 20px #0088ff; transform: scale(1.05); }
+            100% { box-shadow: 0 0 5px #0088ff; transform: scale(1); }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" style="position: absolute; top: 20px; left: 20px; color: #888; text-decoration: none;">◄ RETURN TO TERMINAL</a>
+
+    <div class="menu-container">
+        <h1>P2P FILE SHARE</h1>
+        <div class="subtitle">DIRECT DEVICE-TO-DEVICE CONNECTION</div>
+
+        <div id="step-1">
+            <button class="btn" onclick="hostSession()">OPEN PORT (HOST)</button>
+            <button class="btn" onclick="showJoin()">CONNECT (JOIN)</button>
+        </div>
+
+        <div id="step-join" class="hidden">
+            <h3 style="color: #0088ff;">ENTER HOST CODE</h3>
+            <input type="text" id="join-code" class="input-box" placeholder="----" maxlength="4">
+            <br>
+            <button class="btn" onclick="joinSession()">CONNECT</button>
+            <button class="btn" style="background:#333; border:none;" onclick="resetUI()">CANCEL</button>
+        </div>
+
+        <div id="step-active" class="hidden">
+            <h2 id="connection-status" style="color: #ffaa00;">AWAITING PEER...</h2>
+            <h1 id="host-code-display" style="font-size: 3rem; margin: 10px 0; color: #fff; letter-spacing: 10px;"></h1>
+            
+            <div id="transfer-controls" class="hidden">
+                <input type="file" id="file-input" accept=".savegame" style="display: none;" onchange="sendFile()">
+                <button class="btn pulse" onclick="document.getElementById('file-input').click()">SEND SAVE FILE</button>
+            </div>
+            
+            <button class="btn" style="background:#333; border:none; margin-top: 15px;" onclick="location.reload()">DISCONNECT</button>
+        </div>
+
+        <div id="terminal-log">
+            <div>> SYSTEM INITIALIZED...</div>
+        </div>
+    </div>
+
+    <script>
+        let peer = null;
+        let connection = null;
+
+        function logMsg(msg, type = "") {
+            const logBox = document.getElementById('terminal-log');
+            const entry = document.createElement('div');
+            entry.innerText = "> " + msg;
+            if (type) entry.className = type;
+            logBox.appendChild(entry);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function resetUI() {
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('step-join').classList.add('hidden');
+            document.getElementById('step-active').classList.add('hidden');
+        }
+
+        function showJoin() {
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-join').classList.remove('hidden');
+            document.getElementById('join-code').focus();
+        }
+
+        // ==========================================
+        // HOSTING A SESSION
+        // ==========================================
+        function hostSession() {
+            document.getElementById('step-1').classList.add('hidden');
+            document.getElementById('step-active').classList.remove('hidden');
+            
+            // Generate a random 4 letter/number code
+            const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+            document.getElementById('host-code-display').innerText = roomCode;
+
+            logMsg("OPENING PORT: FAZ-" + roomCode, "log-sys");
+
+            // Initialize PeerJS
+            peer = new Peer("FAZ-" + roomCode);
+
+            peer.on('open', function(id) {
+                logMsg("PORT OPEN. LISTENING FOR CONNECTIONS...");
+            });
+
+            // When someone connects to us
+            peer.on('connection', function(conn) {
+                connection = conn;
+                setupConnectionEvents();
+            });
+
+            peer.on('error', function(err) {
+                logMsg("ERROR: " + err.type, "log-error");
+            });
+        }
+
+        // ==========================================
+        // JOINING A SESSION
+        // ==========================================
+        function joinSession() {
+            const code = document.getElementById('join-code').value.toUpperCase();
+            if (code.length !== 4) return alert("Code must be 4 characters.");
+
+            document.getElementById('step-join').classList.add('hidden');
+            document.getElementById('step-active').classList.remove('hidden');
+            document.getElementById('connection-status').innerText = "CONNECTING...";
+            document.getElementById('host-code-display').innerText = code;
+
+            logMsg("SEARCHING FOR PORT: FAZ-" + code, "log-sys");
+
+            peer = new Peer(); // We don't need a specific ID to join
+
+            peer.on('open', function() {
+                connection = peer.connect("FAZ-" + code);
+                setupConnectionEvents();
+            });
+
+            peer.on('error', function(err) {
+                logMsg("ERROR: " + err.type, "log-error");
+                document.getElementById('connection-status').innerText = "CONNECTION FAILED";
+                document.getElementById('connection-status').style.color = "red";
+            });
+        }
+
+        // ==========================================
+        // CONNECTION & TRANSFER LOGIC
+        // ==========================================
+        function setupConnectionEvents() {
+            connection.on('open', function() {
+                logMsg("SECURE P2P CONNECTION ESTABLISHED!", "log-sys");
+                document.getElementById('connection-status').innerText = "LINK ACTIVE";
+                document.getElementById('connection-status').style.color = "#00ff00";
+                document.getElementById('host-code-display').style.display = "none"; // Hide code
+                document.getElementById('transfer-controls').classList.remove('hidden'); // Show send button
+            });
+
+            // When receiving a file from the other person
+            connection.on('data', function(data) {
+                logMsg("INCOMING DATA PACKET RECEIVED!", "log-sys");
+                
+                if (data.filetype === "savegame") {
+                    logMsg("DECODING SAVE FILE: " + data.filename);
+                    downloadReceivedFile(data.filedata, data.filename);
+                }
+            });
+
+            connection.on('close', function() {
+                logMsg("PEER DISCONNECTED.", "log-error");
+                document.getElementById('connection-status').innerText = "LINK LOST";
+                document.getElementById('connection-status').style.color = "red";
+                document.getElementById('transfer-controls').classList.add('hidden');
+            });
+        }
+
+        function sendFile() {
+            const file = document.getElementById('file-input').files[0];
+            if (!file) return;
+
+            logMsg("PREPARING TO SEND: " + file.name);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Send the file directly through the P2P tunnel
+                connection.send({
+                    filetype: "savegame",
+                    filename: file.name,
+                    filedata: e.target.result
+                });
+                logMsg("FILE TRANSMITTED SUCCESSFULLY!", "log-sys");
+            };
+            reader.readAsDataURL(file); // Convert to base64 for safe transfer
+        }
+
+        function downloadReceivedFile(base64Data, filename) {
+            // Trigger a download automatically when a file is received
+            const a = document.createElement("a");
+            a.href = base64Data;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            logMsg("FILE SAVED TO LOCAL DRIVE.");
+        }
+    </script>
+</body>
+</html>
