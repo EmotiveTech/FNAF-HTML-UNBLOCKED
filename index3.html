@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Fazbear HTML Launcher</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- CHANGELOG BUTTON --- */
+        .changelog-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #111;
+            color: #eee;
+            border: 2px solid #333;
+            padding: 10px 20px;
+            font-family: inherit;
+            text-decoration: none;
+            transition: 0.3s;
+            z-index: 100;
+            font-weight: bold;
+        }
+
+        .changelog-btn:hover {
+            border-color: #b30000;
+            background: #1a0000;
+            color: #fff;
+            box-shadow: 0 0 10px #b30000;
+        }
+
+        /* --- HEADER --- */
+        .header-container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #b30000;
+            text-shadow: 2px 2px 5px #000;
+            letter-spacing: 5px;
+            margin: 0;
+            text-align: center;
+        }
+
+        /* --- GAME GRID --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 100px;
+        }
+
+        .game-card {
+            background: #111;
+            border: 2px solid #222;
+            padding: 20px;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block; 
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-card:hover {
+            border-color: #b30000;
+            background: #1a0000;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #b30000;
+        }
+
+        .game-card h3 { margin: 10px 0; font-size: 1.1rem; }
+        .status { font-size: 0.7rem; color: #666; text-transform: uppercase; }
+
+        /* --- MONITOR OVERLAY --- */
+        #camera-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 5000;
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto; 
+            padding-top: 60px;
+            padding-bottom: 100px;
+        }
+
+        #camera-overlay .grid {
+            border: 4px solid #333;
+            padding: 40px;
+            background: rgba(20, 20, 20, 0.95);
+            box-shadow: inset 0 0 100px #000;
+            max-width: 900px;
+        }
+        
+        #camera-overlay .game-card:hover {
+            border-color: #0088ff;
+            background: #001122;
+            box-shadow: 0 0 15px #0088ff;
+        }
+
+        /* CRT Static Label */
+        #camera-overlay::before {
+            content: "REC ●";
+            position: fixed; top: 20px; left: 30px;
+            color: #ff0000; font-size: 1.5rem; animation: blink 1s infinite;
+            pointer-events: none;
+            z-index: 6000;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- MONITOR TRIGGER --- */
+        #monitor-trigger {
+            position: fixed;
+            bottom: 0;
+            left: 20%; 
+            width: 60%; 
+            height: 40px;
+            background: rgba(50, 50, 50, 0.5);
+            border: 2px solid #555;
+            border-bottom: none;
+            border-radius: 20px 20px 0 0;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #monitor-trigger:hover {
+            height: 60px;
+            background: #b30000;
+        }
+
+        #monitor-trigger::after {
+            content: "▲ HOVER TO FLIP MONITOR ▲";
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        /* --- POPUP --- */
+        .hidden { display: none !important; }
+        
+        #popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10000;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .popup-box {
+            background: #111; border: 2px solid #eee; padding: 30px;
+            text-align: center; max-width: 400px;
+        }
+        .popup-box button {
+            background: #333; color: white; border: none; padding: 10px 20px;
+            margin-top: 15px; cursor: pointer; font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="changelog.html" class="changelog-btn">CHANGELOG</a>
+
+    <div id="popup-overlay" class="hidden">
+        <div class="popup-box">
+            <h2></h2>
+            <div style="color: #ccc; margin: 20px 0;">
+                <h2>FNAF Pizza Sim had broke from the chromebooks running out of ram so I fixed that...</h2>
+                <h2>To view full Changelog, click Changelog in the top right</h2>
+                <a href="https://forms.gle/LFwY5skru2zwPfxx9" style="color:#0088ff;">Click here to answer the survey</a>
+            </div>
+            <label style="color: #888; font-size: 0.8rem; cursor: pointer;">
+                <input type="checkbox" id="popup-mute"> Never Show Again
+            </label>
+            <br>
+            <button onclick="closePopup()">OK</button>
+        </div>
+    </div>
+
+    <div class="header-container">
+        <h1>FAZBEAR ENTERTAINMENT</h1>
+    </div>
+
+    <div class="grid">
+        <a href="1/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 1</h3></a>
+        <a href="2/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 2</h3></a>
+        <a href="3/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 3</h3></a>
+        <a href="4/index.html" class="game-card"><div class="status">System Online</div><h3>FNAF 4</h3></a>
+        <a href="ps/index.html" class="game-card"><div class="status">System Online</div><h3>Pizzeria Sim</h3></a>
+        <a href="ucn/index.html" class="game-card"><div class="status">System Online</div><h3>UCN</h3></a>
+        <a href="w/index.html" class="game-card"><div class="status">System Online</div><h3>World</h3></a>
+    </div>
+
+    <div id="camera-overlay">
+        <h1 style="color:#fff; margin-bottom: 20px;">RESTRICTED FEED: EXTERNAL APPS</h1>
+        <div class="grid">
+            <a href="https://emotivetech.github.io/McVG/projects/bacon-may-die/game.html" class="game-card">
+                <div class="status" style="color: #0088ff;">Feed Active</div>
+                <h3>Bacon May Die</h3>
+            </a>
+            <a href="https://emotivetech.github.io/McVG/projects/1v1lol/game.html" class="game-card">
+                <div class="status" style="color: #0088ff;">Feed Active</div>
+                <h3>1v1.LOL</h3>
+            </a>
+            <a href="https://emotivetech.github.io/McVG/projects/bigredbutton/game.html" class="game-card">
+                <div class="status" style="color: #0088ff;">Feed Active</div>
+                <h3>Big Red Button</h3>
+            </a>
+            <a href="https://emotivetech.github.io/McVG/projects/bloxors/game.html" class="game-card">
+                <div class="status" style="color: #0088ff;">Feed Active</div>
+                <h3>Bloxors</h3>
+            </a>
+            <a href="minecraft/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Minecraft</h3>
+            </a>
+            <a href="chat/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Live Chat</h3>
+            </a>
+            <a href="https://mecvg.github.io/projects/flappy-bird/game.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Flappy Bird</h3>
+            </a>
+            <a href="https://emotivetech.github.io/dino3d/" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Dino Run 3D</h3>
+            </a>
+            <a href="https://emotivetech.github.io/smash-karts.github.io/smash-karts/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Smash Karts</h3>
+            </a>
+            <a href="https://emotivetech.github.io/other-unblocked.github.io/bob-the-robber.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Bob The Robber 1</h3>
+            </a>
+            <a href="https://emotivetech.github.io/McVG/projects/bobtherobber2/game.html" class="game-card">
+                <div class="status" style="color: #0088ff;">Feed Active</div>
+                <h3>Bob The Robber 2</h3>
+            </a>
+            <a href="https://emotivetech.github.io/bob-therobber.github.io/file/index.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Bob The Robber 4</h3>
+            </a>
+            <a href="https://emotivetech.github.io/FNAF-HTML-UNBLOCKED/clock-tab.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Clock Tab</h3>
+            </a>
+            <a href="https://emotivetech.github.io/McVG/projects/baldis-basics/game.html" class="game-card">
+                <div class="status" style="color:#0088ff;">Feed Active</div>
+                <h3>Baldi's Basics</h3>
+            </a>
+        </div>
+    </div>
+
+    <div id="monitor-trigger"></div>
+
+    <script src="renamer.js"></script>
+
+    <script>
+        // --- VERSION CONTROL ---
+        // Change this string (e.g., "v2", "v3", "update-1.5") every time you want the popup to show again!
+        const CURRENT_VERSION = "v2"; 
+        
+        // Check what version the player's browser remembers
+        const savedVersion = localStorage.getItem('faz_system_version');
+        
+        // If the versions don't match, it means you updated the site!
+        if (savedVersion !== CURRENT_VERSION) {
+            // Delete their old "Never Show Again" save
+            localStorage.removeItem('faz_mute_update');
+            // Save the new version number so it doesn't keep popping up every time they refresh
+            localStorage.setItem('faz_system_version', CURRENT_VERSION);
+        }
+
+        // --- POPUP LOGIC ---
+        (function checkPopup() {
+            const isMuted = localStorage.getItem('faz_mute_update');
+            // Only show the popup if they haven't muted this specific version
+            if (isMuted !== "true") {
+                document.getElementById('popup-overlay').classList.remove('hidden');
+            }
+        })();
+
+        function closePopup() {
+            const checkbox = document.getElementById('popup-mute');
+            // If they checked the box, mute the popup for this version
+            if (checkbox.checked) {
+                localStorage.setItem('faz_mute_update', "true");
+            }
+            document.getElementById('popup-overlay').classList.add('hidden');
+        }
+
+        // --- MONITOR HOVER LOGIC ---
+        const trigger = document.getElementById('monitor-trigger');
+        const overlay = document.getElementById('camera-overlay');
+        let isMonitorOpen = false;
+        let isLocked = false; 
+
+        trigger.addEventListener('mouseenter', function() {
+            if (isLocked) return;
+            isLocked = true;
+            setTimeout(() => { isLocked = false; }, 500);
+
+            if (!isMonitorOpen) {
+                overlay.style.display = 'flex';
+                trigger.style.background = '#0088ff';
+                trigger.innerText = "▼ HOVER TO CLOSE ▼";
+                isMonitorOpen = true;
+            } else {
+                overlay.style.display = 'none';
+                trigger.style.background = '';
+                trigger.innerText = "";
+                isMonitorOpen = false;
+            }
+        });
+    </script>
+</body>
+</html>
