@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazbear Data Transfer Terminal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* --- UI ELEMENTS --- */
+        h1 {
+            color: #b30000;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        .menu-container {
+            background: #111;
+            border: 2px solid #333;
+            padding: 40px;
+            box-shadow: inset 0 0 20px #000;
+            width: 400px;
+        }
+
+        .btn {
+            background: #222;
+            color: white;
+            border: 2px solid #555;
+            padding: 15px 30px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.3s;
+            width: 80%;
+        }
+
+        .btn:hover {
+            background: #b30000;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px #b30000;
+        }
+
+        select {
+            background: #000;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 20px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        /* --- PULSE ANIMATION --- */
+        .pulse {
+            animation: pulsing 1.5s infinite;
+            border-color: #0088ff;
+            color: #0088ff;
+        }
+        @keyframes pulsing {
+            0% { box-shadow: 0 0 5px #0088ff; transform: scale(1); }
+            50% { box-shadow: 0 0 20px #0088ff; transform: scale(1.05); }
+            100% { box-shadow: 0 0 5px #0088ff; transform: scale(1); }
+        }
+
+        /* --- CUSTOM MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal-box {
+            background: #111; border: 2px solid #b30000; padding: 30px; width: 300px;
+        }
+        .modal-box input {
+            width: 90%; padding: 10px; margin: 15px 0; background: #000; color: #fff;
+            border: 1px solid #555; font-family: inherit; text-align: center;
+        }
+
+        /* --- BREACH DETECTED --- */
+        #breach-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: red; color: black; font-size: 4rem; font-weight: bold;
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; text-align: center;
+            animation: flash 0.1s infinite;
+        }
+        @keyframes flash {
+            0% { background: red; color: black; }
+            50% { background: black; color: red; }
+            100% { background: red; color: black; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" style="position: absolute; top: 20px; left: 20px; color: #888; text-decoration: none;">◄ BACK</a>
+
+    <div id="main-menu" class="menu-container">
+        <h1>DATA TERMINAL</h1>
+        <p style="color: #888; font-size: 0.8rem;">SECURE SAVE TRANSFER PROTOCOL</p>
+        <button class="btn" onclick="showMenu('download-menu')">DOWNLOAD SAVE</button>
+        <button class="btn" onclick="showMenu('upload-menu')">UPLOAD SAVE</button>
+    </div>
+
+    <div id="download-menu" class="menu-container hidden">
+        <h2 style="color: #0088ff;">EXPORT DATA</h2>
+        <select id="game-select" onchange="checkSelection()">
+            <option value="">-- SELECT A GAME --</option>
+            <option value="1">FNAF 1</option>
+            <option value="2">FNAF 2</option>
+            <option value="3">FNAF 3</option>
+            <option value="4">FNAF 4</option>
+            <option value="ps">Pizzeria Simulator</option>
+            <option value="ucn">Ultimate Custom Night</option>
+            <option value="world">FNAF World</option>
+        </select>
+        <br>
+        <button id="pre-download-btn" class="btn hidden" onclick="openPasswordModal('download')">DOWNLOAD</button>
+        <br>
+        <button class="btn" style="background: #333; border: none; margin-top: 20px;" onclick="showMenu('main-menu')">CANCEL</button>
+    </div>
+
+    <div id="upload-menu" class="menu-container hidden">
+        <h2 style="color: #0088ff;">IMPORT DATA</h2>
+        <p style="color: #aaa; font-size: 0.8rem;">Select your .savegame file</p>
+        <input type="file" id="file-input" accept=".savegame" style="display: none;" onchange="handleFileSelect()">
+        <button class="btn pulse" onclick="document.getElementById('file-input').click()">CHOOSE FILE</button>
+        <br>
+        <button class="btn" style="background: #333; border: none; margin-top: 20px;" onclick="showMenu('main-menu')">CANCEL</button>
+    </div>
+
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title" style="color: #b30000; margin-top: 0;">SET ENCRYPTION KEY</h3>
+            <p style="color: #aaa; font-size: 0.8rem;">Do not forget this password.</p>
+            <input type="password" id="save-password" placeholder="Enter Password...">
+            <br>
+            <button id="modal-action-btn" class="btn" style="width: 100%;">CONFIRM</button>
+            <button class="btn" style="width: 100%; background: #333; border: none;" onclick="closeModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="breach-screen">
+        BREACH DETECTED<br>PASSWORD INCORRECT
+    </div>
+
+    <script>
+        let currentMode = "";
+        let uploadedFileData = "";
+
+        // --- UI NAVIGATION ---
+        function showMenu(menuId) {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('download-menu').classList.add('hidden');
+            document.getElementById('upload-menu').classList.add('hidden');
+            document.getElementById(menuId).classList.remove('hidden');
+            
+            if(menuId === 'download-menu') {
+                document.getElementById('game-select').value = "";
+                document.getElementById('pre-download-btn').classList.add('hidden');
+                document.getElementById('pre-download-btn').classList.remove('pulse');
+            }
+        }
+
+        function checkSelection() {
+            const btn = document.getElementById('pre-download-btn');
+            if (document.getElementById('game-select').value !== "") {
+                btn.classList.remove('hidden');
+                btn.classList.add('pulse'); // Starts pulsing!
+            } else {
+                btn.classList.add('hidden');
+                btn.classList.remove('pulse');
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        function openPasswordModal(mode) {
+            currentMode = mode;
+            document.getElementById('save-password').value = "";
+            document.getElementById('password-modal').style.display = 'flex';
+            
+            if (mode === 'download') {
+                document.getElementById('modal-title').innerText = "SET ENCRYPTION KEY";
+                document.getElementById('modal-action-btn').onclick = executeDownload;
+            } else if (mode === 'upload') {
+                document.getElementById('modal-title').innerText = "ENTER DECRYPTION KEY";
+                document.getElementById('modal-action-btn').onclick = executeUpload;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('password-modal').style.display = 'none';
+        }
+
+        // --- DOWNLOAD / ENCRYPT ---
+        function executeDownload() {
+            const pwd = document.getElementById('save-password').value;
+            const game = document.getElementById('game-select').value;
+            if (!pwd) return alert("Password cannot be empty!");
+
+            // 1. Gather all local storage (saves everything just in case, heavily encrypted)
+            let saveData = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                let key = localStorage.key(i);
+                saveData[key] = localStorage.getItem(key);
+            }
+            
+            let jsonString = JSON.stringify(saveData);
+
+            // 2. Encrypt it with CryptoJS so it looks corrupted if opened as .txt
+            let encrypted = CryptoJS.AES.encrypt(jsonString, pwd).toString();
+
+            // 3. Trigger Download as .savegame
+            let blob = new Blob([encrypted], { type: "text/plain" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "FNAF_" + game.toUpperCase() + "_DATA.savegame";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            closeModal();
+            showMenu('main-menu');
+        }
+
+        // --- UPLOAD / DECRYPT ---
+        function handleFileSelect() {
+            const file = document.getElementById('file-input').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedFileData = e.target.result;
+                openPasswordModal('upload'); // Ask for password once file is loaded
+            };
+            reader.readAsText(file);
+        }
+
+        function executeUpload() {
+            const pwd = document.getElementById('save-password').value;
+            if (!pwd) return;
+
+            try {
+                // Try to decrypt using the password
+                let bytes = CryptoJS.AES.decrypt(uploadedFileData, pwd);
+                let decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+                // If password is wrong, decryptedText will be empty or malformed
+                if (!decryptedText) throw new Error("Bad Password");
+
+                let parsedData = JSON.parse(decryptedText);
+
+                // If correct, inject all saved data back into the browser
+                for (let key in parsedData) {
+                    localStorage.setItem(key, parsedData[key]);
+                }
+
+                alert("SAVE DATA RESTORED SUCCESSFULLY. BOOTING SYSTEM...");
+                window.location.href = "index.html"; // Redirect to main menu
+
+            } catch (error) {
+                // INCORRECT PASSWORD - TRIGGER BREACH
+                closeModal();
+                document.getElementById('breach-screen').style.display = 'flex';
+                
+                // Optional: Reload the page after 4 seconds of flashing
+                setTimeout(() => {
+                    window.location.reload();
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+</html>
