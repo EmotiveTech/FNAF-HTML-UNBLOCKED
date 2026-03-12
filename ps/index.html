@@ -84,4 +84,17 @@
         <h3 id="loading-percent">0%</h3>
     </div>
 </body>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            // The '/' means "look in the main root folder"
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(function(registration) {
+                console.log('Global Speed Cache activated.');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+</script>
 </html>
