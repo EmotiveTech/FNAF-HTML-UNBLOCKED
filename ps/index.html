@@ -88,13 +88,12 @@
         // ==========================================
         // 1. VERSION CONTROLLED CACHE RESET
         // ==========================================
-        const CURRENT_VERSION = 'v1.4'; // CHANGE THIS NUMBER to force a reset for everyone!
+        const CURRENT_VERSION = 'v1.6'; // Bumped to 1.6 to force the final reset
         const savedVersion = localStorage.getItem('fnaf_cache_version');
 
         if (savedVersion !== CURRENT_VERSION) {
             console.log("Old version detected. Wiping caches and Service Workers...");
             
-            // Kill old Service Workers
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for (let registration of registrations) {
@@ -103,12 +102,11 @@
                 });
             }
 
-            // Wipe Cache Storage and reload
             if ('caches' in window) {
                 caches.keys().then(function(cacheNames) {
                     Promise.all(cacheNames.map(cacheName => caches.delete(cacheName))).then(() => {
                         localStorage.setItem('fnaf_cache_version', CURRENT_VERSION);
-                        window.location.reload(true); // Hard reload
+                        window.location.reload(true);
                     });
                 });
             } else {
@@ -117,7 +115,7 @@
             }
         } else {
             // ==========================================
-            // 2. MAIN GAME BOOT SEQUENCE
+            // 2. MAIN GAME BOOT SEQUENCE & SMART CACHING
             // ==========================================
             const originalFetch = window.fetch;
             const parts = 20;
@@ -133,35 +131,56 @@
                 return new Promise((resolve, reject) => {
                     let loadedSize = 0;
                     let buffers = [];
+                    const MANUAL_CACHE_NAME = 'fnaf-massive-files-safe-v1';
 
-                    function fetchPart(index) {
+                    async function fetchPart(index) {
                         if (index >= fileParts.length) {
                             updateProgress('INITIALIZING ENGINE...', 100);
                             let mergedBlob = new Blob(buffers);
                             let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            buffers = null; // Clean RAM to prevent crashes
+                            buffers = null; // Clean RAM
                             resolve(mergedFileUrl);
                             return;
                         }
 
-                        // SMART FETCH: Check the cache first, fallback to network if missing!
-                        caches.match(fileParts[index]).then(cachedResponse => {
+                        let originalUrl = fileParts[index];
+
+                        try {
+                            let cache = await caches.open(MANUAL_CACHE_NAME);
+                            let cachedResponse = await cache.match(originalUrl);
+                            let responseToUse;
+
                             if (cachedResponse) {
-                                return cachedResponse;
+                                // IT IS THERE! Fast load it directly from the hard drive.
+                                responseToUse = cachedResponse;
+                                let percent = Math.floor(((index + 1) / fileParts.length) * 95);
+                                updateProgress('LOADING FROM SAVED FILES...', percent);
+                            } else {
+                                // NOTHING THERE! Download it fresh using the bypass trick.
+                                let bypassUrl = originalUrl + "?nocache=" + Date.now();
+                                let networkResponse = await fetch(bypassUrl);
+                                
+                                if (!networkResponse.ok) throw new Error("Missing part: " + bypassUrl);
+
+                                // Save a copy into the vault for next time
+                                await cache.put(originalUrl, networkResponse.clone());
+                                responseToUse = networkResponse;
+                                
+                                let percent = Math.floor(((index + 1) / fileParts.length) * 95);
+                                updateProgress('DOWNLOADING FRESH FILES...', percent);
                             }
-                            return fetch(fileParts[index]);
-                        }).then((response) => {
-                            if (!response.ok) throw new Error("Missing part: " + fileParts[index]);
-                            return response.arrayBuffer();
-                        }).then((data) => {
+
+                            // Push the data into the game engine
+                            let data = await responseToUse.arrayBuffer();
                             buffers.push(data);
                             loadedSize += data.byteLength;
-                            
-                            let percent = Math.floor(((index + 1) / fileParts.length) * 95);
-                            updateProgress('LOCATING ARCHIVE PARTS...', percent);
-                            
+
+                            // Move to the next part
                             fetchPart(index + 1);
-                        }).catch(reject);
+
+                        } catch (error) {
+                            reject(error);
+                        }
                     }
 
                     fetchPart(0);
@@ -184,32 +203,6 @@
                 let script = document.createElement('script');
                 script.src = 'Runtime.js';
                 document.body.appendChild(script);
-
-                // ==========================================
-                // 3. BACKGROUND CACHING FOR NEXT TIME
-                // ==========================================
-                setTimeout(() => {
-                    if ('caches' in window) {
-                        caches.open('fnaf-massive-files-cache').then(async (cache) => {
-                            console.log("Game started! Saving massive files in the background...");
-                            let fileParts = getParts("resources.zip", 1, parts);
-                            
-                            // Save them one by one so we don't crash Chromebook memory
-                            for (let i = 0; i < fileParts.length; i++) {
-                                let match = await cache.match(fileParts[i]);
-                                if (!match) {
-                                    try {
-                                        await cache.add(fileParts[i]);
-                                        console.log(`Saved part ${i + 1} to cache.`);
-                                    } catch (e) {
-                                        console.warn(`Stopped caching. Chromebook might be out of storage space.`);
-                                        break; 
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }, 5000); // Waits 5 seconds after boot
             }
 
             // Start the whole process
@@ -229,16 +222,20 @@
                 console.error(error);
             });
         }
-        // Register the new, safe Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            console.log('ServiceWorker registration successful');
-        }, function(err) {
-            console.log('ServiceWorker registration failed: ', err);
-        });
-    });
-}
+
+        // ==========================================
+        // 3. REGISTER THE SAFE SERVICE WORKER
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Adjust this path if your sw.js is located somewhere else!
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('Safe ServiceWorker registered.');
+                }).catch(function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
