@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fazbear - Personnel Evaluation</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #eee;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            width: 100%;
+            background: #111;
+            border-bottom: 2px solid #b30000;
+            padding: 15px;
+            text-align: center;
+            z-index: 10;
+        }
+        .header h1 { color: #b30000; margin: 0; font-size: 1.2rem; letter-spacing: 3px; }
+        
+        /* The container for your Google Form */
+        .iframe-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            background: #000;
+        }
+        iframe {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            border: none;
+        }
+        .back-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #222;
+            color: #fff;
+            padding: 10px 15px;
+            text-decoration: none;
+            border: 1px solid #444;
+            font-size: 0.8rem;
+        }
+        .back-btn:hover { background: #b30000; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>FAZBEAR PERSONNEL EVALUATION SYSTEM</h1>
+    </div>
+
+    <div class="iframe-container">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScEQVVo2A_NHNmkeZNC-EaIOuYwKL5WCUxOsvpMWvuL7gCfkQ/viewform?embedded=true">Loading…</iframe>
+    </div>
+
+    <a href="index.html" class="back-btn">EXIT TERMINAL</a>
+
+</body>
+</html>
