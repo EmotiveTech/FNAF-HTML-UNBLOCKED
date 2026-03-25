@@ -3,68 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fazbear - Personnel Evaluation</title>
+    <title>Fazbear Terminal - Feedback</title>
     <style>
         body {
             background-color: #050505;
             color: #eee;
             font-family: 'Courier New', Courier, monospace;
-            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            padding: 40px;
+            margin: 0;
         }
-        .header {
-            width: 100%;
+
+        .terminal-box {
+            border: 2px solid #b30000;
             background: #111;
-            border-bottom: 2px solid #b30000;
-            padding: 15px;
-            text-align: center;
-            z-index: 10;
-        }
-        .header h1 { color: #b30000; margin: 0; font-size: 1.2rem; letter-spacing: 3px; }
-        
-        /* The container for your Google Form */
-        .iframe-container {
+            padding: 30px;
+            max-width: 600px;
             width: 100%;
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
+            box-shadow: 0 0 20px rgba(179, 0, 0, 0.4);
+            position: relative;
+        }
+
+        h1 { color: #b30000; text-align: center; letter-spacing: 5px; font-size: 1.5rem; }
+       
+        .question-block { margin-bottom: 25px; }
+       
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #888;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
             background: #000;
+            border: 1px solid #333;
+            color: #0088ff;
+            padding: 12px;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
         }
-        iframe {
+
+        input:focus, textarea:focus { border-color: #0088ff; }
+
+        button {
             width: 100%;
-            max-width: 800px;
-            height: 100%;
+            background: #b30000;
+            color: white;
             border: none;
+            padding: 15px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.3s;
+            letter-spacing: 2px;
         }
-        .back-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: #222;
-            color: #fff;
-            padding: 10px 15px;
-            text-decoration: none;
-            border: 1px solid #444;
-            font-size: 0.8rem;
+
+        button:hover {
+            background: #ff0000;
+            box-shadow: 0 0 15px #ff0000;
         }
-        .back-btn:hover { background: #b30000; }
+
+        .back-link { margin-top: 20px; color: #444; text-decoration: none; font-size: 0.8rem; }
+        .back-link:hover { color: #eee; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>FAZBEAR PERSONNEL EVALUATION SYSTEM</h1>
+    <div class="terminal-box">
+        <h1>DATA ENTRY TERMINAL</h1>
+        <p style="color: #666; font-size: 0.7rem; text-align: center; margin-bottom: 30px;">
+            CONFIDENTIAL: FAZBEAR ENTERTAINMENT PIZZERIA FEEDBACK
+        </p>
+
+        <form id="fnaf-survey" action="https://formspree.io/f/mlgoedeb" method="POST">
+            <div id="questions-container">
+                </div>
+            <button type="submit">UPLOAD TO CLOUD</button>
+        </form>
     </div>
 
-    <div class="iframe-container">
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScEQVVo2A_NHNmkeZNC-EaIOuYwKL5WCUxOsvpMWvuL7gCfkQ/viewform?embedded=true">Loading…</iframe>
-    </div>
+    <a href="index.html" class="back-link">_RETURN_TO_MAIN_MENU</a>
 
-    <a href="index.html" class="back-btn">EXIT TERMINAL</a>
+    <script>
+        // ==========================================
+        // 📝 EDIT YOUR QUESTIONS HERE
+        // ==========================================
+        const MY_QUESTIONS = [
+            { label: "Night Guard Name / ID", name: "username", type: "text" },
+            { label: "Which animatronic is causing issues?", name: "animatronic_issue", type: "text" },
+            { label: "Did you survive the shift?", name: "survival_status", type: "text" },
+            { label: "Suggestions for Management", name: "feedback", type: "textarea" }
+        ];
+        // ==========================================
 
+        const container = document.getElementById('questions-container');
+
+        // This loop automatically builds the form based on your list above
+        MY_QUESTIONS.forEach(q => {
+            const div = document.createElement('div');
+            div.className = 'question-block';
+
+            const label = document.createElement('label');
+            label.innerText = q.label;
+           
+            let input;
+            if (q.type === "textarea") {
+                input = document.createElement('textarea');
+                input.rows = 4;
+            } else {
+                input = document.createElement('input');
+                input.type = "text";
+            }
+           
+            input.name = q.name;
+            input.required = true;
+
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        });
+    </script>
 </body>
 </html>
